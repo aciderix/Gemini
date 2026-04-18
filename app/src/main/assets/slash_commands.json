@@ -1,0 +1,6 @@
+[
+  "/auth", "/login", "/logout", "/status", "/help", "/model", "/models", "/config", "/profile", "/workspace",
+  "/pwd", "/ls", "/cd", "/cat", "/edit", "/write", "/mkdir", "/rm", "/mv", "/cp",
+  "/find", "/search", "/grep", "/run", "/shell", "/terminal", "/exec", "/python", "/npm", "/git",
+  "/branch", "/commit", "/diff", "/test", "/lint", "/format", "/plan", "/apply", "/undo", "/redo"
+]
