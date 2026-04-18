@@ -8,6 +8,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      GEMINI_KEYSTORE_PASSWORD: ${{ secrets.GEMINI_KEYSTORE_PASSWORD }}
+      GEMINI_KEY_ALIAS: ${{ secrets.GEMINI_KEY_ALIAS }}
+      GEMINI_KEY_PASSWORD: ${{ secrets.GEMINI_KEY_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -22,8 +26,14 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Gradle
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
+
+      - name: Resolve signing defaults
+        run: |
+          echo "GEMINI_KEYSTORE_PASSWORD=${GEMINI_KEYSTORE_PASSWORD:-changeit123}" >> "$GITHUB_ENV"
+          echo "GEMINI_KEY_ALIAS=${GEMINI_KEY_ALIAS:-gemini_mobile}" >> "$GITHUB_ENV"
+          echo "GEMINI_KEY_PASSWORD=${GEMINI_KEY_PASSWORD:-changeit123}" >> "$GITHUB_ENV"
 
       - name: Generate release keystore
         run: |
@@ -38,18 +48,11 @@ jobs:
             -keysize 2048 \
             -validity 3650 \
             -dname "CN=Gemini CLI Mobile,O=GeminiMobile,C=US"
-        env:
-          GEMINI_KEYSTORE_PASSWORD: ${{ secrets.GEMINI_KEYSTORE_PASSWORD || 'changeit123' }}
-          GEMINI_KEY_ALIAS: ${{ secrets.GEMINI_KEY_ALIAS || 'gemini_mobile' }}
-          GEMINI_KEY_PASSWORD: ${{ secrets.GEMINI_KEY_PASSWORD || 'changeit123' }}
 
       - name: Build release APK
         run: gradle --stacktrace assembleRelease
         env:
           GEMINI_KEYSTORE_PATH: ${{ github.workspace }}/.keystore/gemini-mobile.jks
-          GEMINI_KEYSTORE_PASSWORD: ${{ secrets.GEMINI_KEYSTORE_PASSWORD || 'changeit123' }}
-          GEMINI_KEY_ALIAS: ${{ secrets.GEMINI_KEY_ALIAS || 'gemini_mobile' }}
-          GEMINI_KEY_PASSWORD: ${{ secrets.GEMINI_KEY_PASSWORD || 'changeit123' }}
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

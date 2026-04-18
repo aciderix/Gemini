@@ -1,25 +1,27 @@
 # Gemini CLI Mobile (Android)
 
-Application Android qui expose **tout le backend Gemini CLI** via un bridge HTTP, avec authentification account/API, exécution de commandes CLI, et exécution shell explicite (`/shell`, `/exec`).
+Application Android qui expose le backend Gemini CLI via un bridge HTTP, avec authentification token, exécution de commandes CLI, exécution shell (`/shell`, `/exec`) et support du `cwd` pour manipuler les fichiers comme dans un terminal.
 
 ## Fonctionnalités implémentées
 
-- Interface mobile type assistant code (Compose).
-- Menu slash commands (40 commandes) + entrée libre.
-- Login account `/api` côté bridge (`/v1/account/login`).
-- Status session (`/v1/account/status`), récupération des commandes (`/v1/cli/commands`).
-- Exécution Gemini CLI réelle (`npm run gemini -- <input>`).
-- Exécution shell réelle via `/shell ...` ou `/exec ...`.
-- Gestion du `cwd` (working directory) pour agir sur les fichiers comme dans un terminal.
+- UI Compose type assistant code.
+- Menu slash commands (40 commandes).
+- Endpoints bridge :
+  - `POST /v1/account/login`
+  - `POST /v1/account/status`
+  - `POST /v1/cli/commands`
+  - `POST /v1/cli/execute`
+- Exécution Gemini CLI réelle via `npm run gemini -- <input>`.
+- Exécution shell explicite via `/shell ...` ou `/exec ...`.
 
-## Backend bridge
+## Démarrage local
 
 ```bash
 ./tools/fetch_gemini_cli.sh
 python3 tools/gemini_cli_bridge.py
 ```
 
-Bridge par défaut : `http://0.0.0.0:8765`.
+Puis démarrer l’app Android (émulateur) et pointer l’URL bridge `http://10.0.2.2:8765`.
 
 ## Build APK signé local
 
@@ -32,10 +34,19 @@ Variables supportées :
 - `GEMINI_KEY_ALIAS`
 - `GEMINI_KEY_PASSWORD`
 
-## GitHub Actions
+## GitHub Actions (build APK)
 
-Le workflow `.github/workflows/android-build.yml` build un APK release signé et l’upload en artifact.
-Pour une signature personnalisée, configure ces secrets repo :
+Workflow: `.github/workflows/android-build.yml`.
+
+- Build release APK à chaque push/PR.
+- Génère un keystore de CI (fallback si secrets absents).
+- Upload l’APK (`app-release-apk`) en artifact.
+
+Secrets optionnels recommandés :
 - `GEMINI_KEYSTORE_PASSWORD`
 - `GEMINI_KEY_ALIAS`
 - `GEMINI_KEY_PASSWORD`
+
+## Sécurité
+
+⚠️ Ne jamais publier un token/API key en clair dans un message, commit ou workflow. Si un token a été exposé, il faut le révoquer immédiatement et en générer un nouveau.
